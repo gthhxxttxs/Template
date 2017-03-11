@@ -22,14 +22,15 @@ import java.util.Set;
 
 /**
  * 权限工具
- * PermissionUtil.i(activity)
+ * PermissionUtil.request(activity)
  *         .permission(Manifest.permission.CAMERA)
  *         .request(new PermissionUtil.Callback<PermissionUtil.Permission>() {
  *             public void call(PermissionUtil.Permission permission) {
  *                 permission.isGranted();
  *             }
  *         });
- *
+ * 在Activity的onRequestPermissionsResult方法中
+ * 调PermissionUtil.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
  * Created by 高腾 on 2017/2/22.
  */
 
@@ -104,8 +105,8 @@ public class PermissionUtil {
 
     private PermissionUtil() {}
 
-    public static PermissionUtil i(@NonNull Activity activity) {
-        init().newRequest();
+    public static PermissionUtil request(@NonNull Activity activity) {
+        i().newRequest();
         if (sActivity != null && activity.equals(sActivity.get())) {
             return i;
         }
@@ -113,7 +114,7 @@ public class PermissionUtil {
         return i;
     }
 
-    private static PermissionUtil init() {
+    private static PermissionUtil i() {
         if (i == null) {
             synchronized (PermissionUtil.class) {
                 if (i == null) {
@@ -148,7 +149,7 @@ public class PermissionUtil {
      * 请求权限
      * @param callback 每个权限会回调一次
      */
-    public void request(@NonNull Callback<Permission> callback) {
+    public void callback(@NonNull Callback<Permission> callback) {
         for (String permission : params) {
             Set<Callback<Permission>> callbacks = sMap.get(permission);
             if (callbacks == null) {
@@ -199,60 +200,44 @@ public class PermissionUtil {
      * 请求权限是否全部允许
      * @param callback 回调
      */
-    public void requestAllGranted(@NonNull final Callback<Boolean> callback) {
-        final Set<String> temp = this.params;
-        request(new Callback<Permission>() {
-            boolean isOver = false;
-            int i = 0;
-            @Override
-            public void call(Permission permission) {
-                // 如果结束或者返回的权限不是这次请求里的不做处理
-                if (isOver || !temp.contains(permission.getName())) {
-                    return;
-                }
-                i++; // 记录处理次数
-                // 如果返回的权限被拒，则直接返回被拒结果，不再继续处理
-                if (!permission.isGranted) {
-                    callback.call(false);
-                    isOver = true;
-                    return;
-                }
-                // 如果最后一次都没被拒，则说明用户全部允许，返回允许结果
-                if (i == temp.size()) {
-                    callback.call(true);
-                }
-            }
-        });
+    public void callbackByAllGranted(@NonNull final Callback<Boolean> callback) {
+        callback(transformCallback(params, callback, true));
     }
 
     /**
      * 请求权限是否有任何一个被允许
      * @param callback 回调
      */
-    public void requestAnyoneGranted(@NonNull final Callback<Boolean> callback) {
-        final Set<String> temp = this.params;
-        request(new Callback<Permission>() {
+    public void callbackByAnyoneGranted(@NonNull final Callback<Boolean> callback) {
+        callback(transformCallback(params, callback, false));
+    }
+
+    private Callback<Permission> transformCallback(@NonNull final Set<String> permissions,
+                                                   @NonNull final Callback<Boolean> callback,
+                                                   final boolean shouldAllGranted) {
+        return new Callback<Permission>() {
             boolean isOver = false;
             int i = 0;
             @Override
             public void call(Permission permission) {
                 // 如果结束或者返回的权限不是这次请求里的不做处理
-                if (isOver || !temp.contains(permission.getName())) {
+                if (isOver || !permissions.contains(permission.getName())) {
                     return;
                 }
                 i++; // 记录处理次数
-                // 如果返回的权限被允许，则直接返回允许结果，不再继续处理
-                if (permission.isGranted) {
-                    callback.call(true);
+                // 是否授权与是否要求全部不同则结束
+                // 即结束条件是要求全部授权却未授权 | 不要求全部授权而已授权
+                if (permission.isGranted ^ shouldAllGranted) {
+                    callback.call(!shouldAllGranted);
                     isOver = true;
                     return;
                 }
                 // 如果最后一次都没被允许，则说明用户全部拒绝，返回拒绝结果
-                if (i == temp.size()) {
-                    callback.call(false);
+                if (i == permissions.size()) {
+                    callback.call(shouldAllGranted);
                 }
             }
-        });
+        };
     }
 
     @TargetApi(Build.VERSION_CODES.M)

@@ -59,18 +59,14 @@ public class App extends Application {
         sActivityList.remove(activity);
     }
 
-    /**
-     * 正常退出应用
-     */
+    /** 正常退出应用. */
     public static void exit() {
         LogUtil.e(TAG, "app exit");
         finishAllActivity();
         System.exit(0);
     }
 
-    /**
-     * 杀死当前应用
-     */
+    /** 杀死当前应用. */
     public static void kill() {
         finishAllActivity();
         Process.killProcess(Process.myPid());
