@@ -12,7 +12,6 @@ public class MainActivity extends BaseActivity {
     }
 
     public void test(View view) {
-        int a = 2 / 0;
     }
 
     public void test2(View view) {

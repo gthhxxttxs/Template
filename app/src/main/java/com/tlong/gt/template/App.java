@@ -2,8 +2,8 @@ package com.tlong.gt.template;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.ListActivity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Process;
 
 import com.tlong.gt.template.common.CrashHandler;
@@ -24,13 +24,13 @@ public class App extends Application {
 
     private static WeakReference<Context> sContext;
 
-    private static List<Activity> mActivityList;
+    private static List<Activity> sActivityList;
 
     @Override
     public void onCreate() {
         super.onCreate();
         sContext = new WeakReference<>(getApplicationContext());
-        mActivityList = new LinkedList<>();
+        sActivityList = new LinkedList<>();
         CrashHandler.start();
     }
 
@@ -41,12 +41,22 @@ public class App extends Application {
         return sContext.get();
     }
 
+    public static boolean checkActivityDestroyed(Activity activity) {
+        if (activity == null) {
+            return true;
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return activity.isFinishing();
+        }
+        return activity.isDestroyed();
+    }
+
     public static void addActivity(Activity activity) {
-        mActivityList.add(activity);
+        sActivityList.add(activity);
     }
 
     public static void removeActivity(Activity activity) {
-        mActivityList.remove(activity);
+        sActivityList.remove(activity);
     }
 
     /**
@@ -68,7 +78,7 @@ public class App extends Application {
     }
 
     private static void finishAllActivity() {
-        for (Activity activity : mActivityList) {
+        for (Activity activity : sActivityList) {
             activity.finish();
         }
     }
