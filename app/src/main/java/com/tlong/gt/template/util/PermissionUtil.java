@@ -105,15 +105,6 @@ public class PermissionUtil {
 
     private PermissionUtil() {}
 
-    public static PermissionUtil request(@NonNull Activity activity) {
-        i().newRequest();
-        if (sActivity != null && activity.equals(sActivity.get())) {
-            return i;
-        }
-        sActivity = new WeakReference<>(activity);
-        return i;
-    }
-
     private static PermissionUtil i() {
         if (i == null) {
             synchronized (PermissionUtil.class) {
@@ -125,9 +116,17 @@ public class PermissionUtil {
         return i;
     }
 
-    private void newRequest() {
+    public static PermissionUtil request(@NonNull Activity activity) {
+        if (sActivity == null || !activity.equals(sActivity.get())) {
+            sActivity = new WeakReference<>(activity);
+        }
+        return i().newRequest();
+    }
+
+    private PermissionUtil newRequest() {
         // 每次请求用新的参数容器，方便做最后的处理
         params = new HashSet<>();
+        return this;
     }
 
     public PermissionUtil permission(@NonNull String permission) {
@@ -245,7 +244,7 @@ public class PermissionUtil {
                                                   int requestCode,
                                                   @NonNull String[] permissions,
                                                   @NonNull int[] grantResults) {
-        if (requestCode != REQUEST_CODE) return;
+        if (requestCode != REQUEST_CODE || sActivity == null) return;
         Activity act = sActivity.get();
         if (act == null || act.isDestroyed() || !act.equals(activity)) {
             over();
@@ -285,7 +284,10 @@ public class PermissionUtil {
      * 请求结束重置全局参数
      */
     private static void over() {
-        sActivity = null;
+        if (sActivity != null) {
+            sActivity.clear();
+            sActivity = null;
+        }
         sMap.clear();
         allPermissions.clear();
         isPrepare = true;
