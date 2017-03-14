@@ -1,10 +1,12 @@
 package com.tlong.gt.template.ui;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +14,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tlong.gt.template.R;
+import com.tlong.gt.template.util.LogUtil;
 import com.tlong.gt.template.widget.DividerGridItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
@@ -47,6 +50,13 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void onClick(View view) {
+        int position = ((RecyclerView.LayoutParams) view.getLayoutParams()).getViewLayoutPosition();
+        LogUtil.e(tag, "position=" + position);
+        startActivity(new Intent(mActivity, AccountListActivity.class));
+    }
+
     private class RecyclerAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
         @Override
@@ -57,13 +67,7 @@ public class MainActivity extends BaseActivity {
 
         @Override
         public void onBindViewHolder(RecyclerViewHolder holder, int position) {
-            ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
-            if (position % 2 == 0) {
-                layoutParams.height = 600;
-            } else {
-                layoutParams.height = 300;
-            }
-            holder.itemView.setLayoutParams(layoutParams);
+            holder.itemView.setTag(position);
             holder.icon.setImageResource(R.mipmap.ic_launcher);
             holder.name.setText(mDataList.get(position));
         }
@@ -83,6 +87,7 @@ public class MainActivity extends BaseActivity {
             super(itemView);
             icon = (ImageView) itemView.findViewById(R.id.icon);
             name = (TextView) itemView.findViewById(R.id.name);
+            itemView.setOnClickListener(MainActivity.this);
         }
     }
 }

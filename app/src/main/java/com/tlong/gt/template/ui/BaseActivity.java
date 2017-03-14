@@ -16,6 +16,8 @@ import com.tlong.gt.template.util.PermissionUtil;
 
 public class BaseActivity extends AppCompatActivity {
 
+    protected final String tag = this.getClass().getSimpleName();
+
     protected Activity mActivity;
 
     @Override
