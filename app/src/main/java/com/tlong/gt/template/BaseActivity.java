@@ -1,5 +1,6 @@
 package com.tlong.gt.template;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,9 +15,12 @@ import com.tlong.gt.template.util.PermissionUtil;
 
 public class BaseActivity extends AppCompatActivity {
 
+    protected Activity mActivity;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mActivity = this;
         App.addActivity(this);
     }
 
