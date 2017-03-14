@@ -16,12 +16,10 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.SparseArray;
 import android.view.View;
 
-import com.tlong.gt.template.util.LogUtil;
-
 /**
  * 网格布局分割线
  * 只有内部纵横线，最外部没有
- * Created by v_gaoteng on 2017/3/13.
+ * Created by 高腾 on 2017/3/13.
  */
 
 public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
@@ -29,22 +27,22 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
     private static final String TAG = DividerGridItemDecoration.class.getSimpleName();
 
     private Drawable mDivider;
-    private int dividerWidth;
-    private int dividerHeight;
+    private int mDividerWidth;
+    private int mDividerHeight;
     private Rect mTempRect = new Rect();
     private Rect mBounds = new Rect();
     private SparseArray<boolean[]> mItemDraw = new SparseArray<>();
 
     public DividerGridItemDecoration(int color, int dividerWidth, int dividerHeight) {
         mDivider = new ColorDrawable(color);
-        this.dividerWidth = dividerWidth;
-        this.dividerHeight = dividerHeight;
+        mDividerWidth = dividerWidth;
+        mDividerHeight = dividerHeight;
     }
 
     public void setDrawable(@NonNull Drawable drawable) {
         mDivider = drawable;
-        this.dividerWidth = drawable.getIntrinsicWidth();
-        this.dividerHeight = drawable.getIntrinsicHeight();
+        mDividerWidth = drawable.getIntrinsicWidth();
+        mDividerHeight = drawable.getIntrinsicHeight();
     }
 
     @Override
@@ -67,7 +65,6 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
         } else {
             mTempRect.setEmpty();
         }
-        LogUtil.e(TAG, "position=" + itemPosition + ", outRect=" + mTempRect.toString());
         // 设置当前Item的偏移量,用于绘制Decorator
         outRect.set(mTempRect);
     }
@@ -126,25 +123,25 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
         shouldDraw[3] = bottom;
 
         if (left) {
-            mTempRect.left = dividerWidth;
+            mTempRect.left = mDividerWidth;
         } else {
             mTempRect.left = 0;
         }
 
         if (top) {
-            mTempRect.top = dividerHeight;
+            mTempRect.top = mDividerHeight;
         } else {
             mTempRect.top = 0;
         }
 
         if (right) {
-            mTempRect.right = dividerWidth;
+            mTempRect.right = mDividerWidth;
         } else {
             mTempRect.right = 0;
         }
 
         if (bottom) {
-            mTempRect.bottom = dividerHeight;
+            mTempRect.bottom = mDividerHeight;
         } else {
             mTempRect.bottom = 0;
         }
@@ -223,7 +220,7 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
     /** 绘制左侧垂直线. */
     private void drawLeft(Canvas c, int x, int y) {
         final int left = mBounds.left + x;
-        final int right = left + dividerWidth;
+        final int right = left + mDividerWidth;
         mDivider.setBounds(left, mBounds.top + y, right, mBounds.bottom + y);
         mDivider.draw(c);
     }
@@ -231,7 +228,7 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
     /** 绘制顶部水平线. */
     private void drawTop(Canvas c, int x, int y) {
         final int top = mBounds.top + y;
-        final int bottom = top + dividerHeight;
+        final int bottom = top + mDividerHeight;
         mDivider.setBounds(mBounds.left + x, top, mBounds.right + x, bottom);
         mDivider.draw(c);
     }
@@ -239,7 +236,7 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
     /** 绘制右侧垂直线. */
     private void drawRight(Canvas c, int x, int y) {
         final int right = mBounds.right + x;
-        final int left = right - dividerWidth;
+        final int left = right - mDividerWidth;
         mDivider.setBounds(left, mBounds.top + y, right, mBounds.bottom + y);
         mDivider.draw(c);
     }
@@ -247,7 +244,7 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
     /** 绘制底部水平线. */
     private void drawBottom(Canvas c, int x, int y) {
         final int bottom = mBounds.bottom + y;
-        final int top = bottom - dividerHeight;
+        final int top = bottom - mDividerHeight;
         mDivider.setBounds(mBounds.left + x, top, mBounds.right + x, bottom);
         mDivider.draw(c);
     }

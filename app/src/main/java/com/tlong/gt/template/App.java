@@ -68,6 +68,7 @@ public class App extends Application {
 
     /** 杀死当前应用. */
     public static void kill() {
+        LogUtil.e(TAG, "app kill");
         finishAllActivity();
         Process.killProcess(Process.myPid());
         System.exit(1);

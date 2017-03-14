@@ -1,4 +1,4 @@
-package com.tlong.gt.template;
+package com.tlong.gt.template.ui;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.tlong.gt.template.R;
 import com.tlong.gt.template.widget.DividerGridItemDecoration;
 
 import java.util.ArrayList;
