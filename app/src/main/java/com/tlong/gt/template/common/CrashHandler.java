@@ -1,13 +1,7 @@
 package com.tlong.gt.template.common;
 
-import android.support.v7.app.AlertDialog;
-
 import com.tlong.gt.template.App;
 import com.tlong.gt.template.util.LogUtil;
-
-import java.io.File;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 /**
  * 全局异常处理器
