@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Process;
 
+import com.litesuits.orm.LiteOrm;
 import com.tlong.gt.template.common.CrashHandler;
 import com.tlong.gt.template.util.LogUtil;
 
@@ -26,12 +27,17 @@ public class App extends Application {
 
     private static List<Activity> sActivityList;
 
+    private static LiteOrm sDao;
+
     @Override
     public void onCreate() {
         super.onCreate();
         sContext = new WeakReference<>(getApplicationContext());
         sActivityList = new LinkedList<>();
-        CrashHandler.start();
+//        CrashHandler.start();
+
+        // 初始化数据库操作类
+        sDao = LiteOrm.newCascadeInstance(getApplicationContext(), "template.db");
     }
 
     /**
@@ -78,5 +84,10 @@ public class App extends Application {
         for (Activity activity : sActivityList) {
             activity.finish();
         }
+    }
+
+    /** 操作数据库. */
+    public static LiteOrm getDao() {
+        return sDao;
     }
 }
