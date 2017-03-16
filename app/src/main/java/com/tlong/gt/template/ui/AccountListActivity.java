@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.litesuits.orm.db.assit.QueryBuilder;
+import com.tlong.gt.template.App;
 import com.tlong.gt.template.BR;
 import com.tlong.gt.template.R;
 import com.tlong.gt.template.adapter.DataBingingAdapter;
@@ -27,7 +29,7 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
 
     private RecyclerView mAccountListView;
     private DataBingingAdapter mAdapter;
-    private List<Account> mAccountList;
+    private List<Account> mShowDataList;
 
 
 
@@ -38,6 +40,24 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        initToolbar(toolbar);
+
+        mAccountListView = (RecyclerView) findViewById(R.id.account_list);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
+        mAccountListView.setLayoutManager(layoutManager);
+        mAdapter = new DataBingingAdapter(mActivity, R.layout.item_account_list, BR.account);
+        mShowDataList = new ArrayList<>();
+        mAdapter.setDataList(mShowDataList);
+        mAccountListView.setAdapter(mAdapter);
+        mAccountListView.addItemDecoration(new DividerGridItemDecoration(Color.BLUE, 10, 10));
+        mAccountListView.setItemAnimator(new DefaultItemAnimator());
+
+        mAdapter.setOnItemClickListener(this);
+
+        initData();
+    }
+
+    private void initToolbar(Toolbar toolbar) {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,18 +86,13 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
                 return true;
             }
         });
+    }
 
-        mAccountListView = (RecyclerView) findViewById(R.id.account_list);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
-        mAccountListView.setLayoutManager(layoutManager);
-        mAdapter = new DataBingingAdapter(mActivity, R.layout.item_account_list, BR.account);
-        mAccountListView.setAdapter(mAdapter);
-        mAccountListView.addItemDecoration(new DividerGridItemDecoration(Color.BLUE, 10, 10));
-        mAccountListView.setItemAnimator(new DefaultItemAnimator());
-
-        mAdapter.setOnItemClickListener(this);
-
-        initData();
+    private void initData() {
+        for (int i = 0; i < 30; i++) {
+            App.getDao().insert(new Account("QQ" + i, "qwe" + (i * 2), "123" + (i * 3)));
+        }
+        updateAllData(App.getDao().query(Account.class));
     }
 
     @Override
@@ -105,21 +120,22 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
             @Override
             public boolean onQueryTextChange(String newText) {
                 LogUtil.e(tag, "searchText:" + newText);
-                return false;
+                ArrayList<Account> list = App.getDao().query(new QueryBuilder<>(Account.class)
+                        .where("label LIKE ?", "%" + newText + "%")
+                        .whereAppendOr()
+                        .whereAppend("name LIKE ?", "%" + newText + "%")
+                        .whereAppendOr()
+                        .whereAppend("password LIKE ?", "%" + newText + "%"));
+                updateAllData(list);
+                return true;
             }
         });
     }
 
-    private void initData() {
-        mAccountList = new ArrayList<>();
-        mAdapter.setDataList(mAccountList);
-        for (int i = 0; i < 20; i++) {
-            Account account = new Account();
-            account.setLabel("QQ" + i);
-            account.setName("qaz" + i);
-            account.setPassword("123qwe" + i);
-            mAccountList.add(account);
-        }
+    private void updateAllData(List<Account> dataList) {
+        mShowDataList.clear();
+        mShowDataList.addAll(dataList);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
