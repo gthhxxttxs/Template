@@ -6,11 +6,11 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.tlong.gt.template.BR;
 import com.tlong.gt.template.R;
@@ -23,11 +23,13 @@ import com.tlong.gt.template.widget.DividerGridItemDecoration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountListActivity extends BaseActivity implements DataBingingAdapter.OnItemClickListener {
+public class AccountListActivity extends MenuActivity implements DataBingingAdapter.OnItemClickListener {
 
     private RecyclerView mAccountListView;
     private DataBingingAdapter mAdapter;
     private List<Account> mAccountList;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +81,33 @@ public class AccountListActivity extends BaseActivity implements DataBingingAdap
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_account_list, menu);
-        return true;
+    protected int getMenuResource() {
+        return R.menu.menu_account_list;
+    }
+
+    @Override
+    protected void initMenu(Menu menu) {
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        // 注册搜索框，方便之后折叠
+        registerCanExpandActionViewMenuItem(searchItem);
+
+        initSearchView((SearchView) searchItem.getActionView());
+    }
+
+    private void initSearchView(SearchView searchView) {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // return true 不再发action，启动处理的Activity
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                LogUtil.e(tag, "searchText:" + newText);
+                return false;
+            }
+        });
     }
 
     private void initData() {
@@ -99,6 +125,7 @@ public class AccountListActivity extends BaseActivity implements DataBingingAdap
     @Override
     public void onItemClick(View view, int position) {
         LogUtil.e(tag, "position=" + position);
+        collapseAllActionView();
         startActivity(new Intent(mActivity, AccountDetailsActivity.class));
     }
 }
