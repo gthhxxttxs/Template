@@ -3,6 +3,7 @@ package com.tlong.gt.template.ui;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,13 +26,11 @@ import com.tlong.gt.template.widget.DividerGridItemDecoration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountListActivity extends MenuActivity implements DataBingingAdapter.OnItemClickListener {
+public class AccountListActivity extends MenuActivity implements DataBingingAdapter.OnItemClickListener, View.OnClickListener {
 
     private RecyclerView mAccountListView;
     private DataBingingAdapter mAdapter;
     private List<Account> mShowDataList;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +40,8 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         initToolbar(toolbar);
+
+        findViewById(R.id.action_btn).setOnClickListener(this);
 
         mAccountListView = (RecyclerView) findViewById(R.id.account_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
@@ -53,8 +54,6 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
         mAccountListView.setItemAnimator(new DefaultItemAnimator());
 
         mAdapter.setOnItemClickListener(this);
-
-        initData();
     }
 
     private void initToolbar(Toolbar toolbar) {
@@ -70,9 +69,6 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
             public boolean onMenuItemClick(MenuItem item) {
                 String msg;
                 switch (item.getItemId()) {
-                    case R.id.action_add:
-                        msg = "add";
-                        break;
                     case R.id.action_search:
                         msg = "search";
                         break;
@@ -88,10 +84,9 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
         });
     }
 
-    private void initData() {
-        for (int i = 0; i < 30; i++) {
-            App.getDao().insert(new Account("QQ" + i, "qwe" + (i * 2), "123" + (i * 3)));
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
         updateAllData(App.getDao().query(Account.class));
     }
 
@@ -140,8 +135,21 @@ public class AccountListActivity extends MenuActivity implements DataBingingAdap
 
     @Override
     public void onItemClick(View view, int position) {
-        LogUtil.e(tag, "position=" + position);
+        toDetails(mShowDataList.get(position).getId());
+    }
+
+    private void toDetails(int id) {
         collapseAllActionView();
-        startActivity(new Intent(mActivity, AccountDetailsActivity.class));
+        AccountDetailsActivity.start(mActivity, id);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.action_btn:
+                toDetails(-1);
+                break;
+            default:
+        }
     }
 }
