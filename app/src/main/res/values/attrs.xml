@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LockPatternView">
+        <attr name="aspect" format="enum">
+            <enum name="square" value="0"/>
+            <enum name="lock_width" value="1"/>
+            <enum name="lock_height" value="2"/>
+        </attr>
+        <attr name="regularColor" format="color"/>
+        <attr name="errorColor" format="color"/>
+        <attr name="successColor" format="color"/>
+        <attr name="pathColor" format="color"/>
+    </declare-styleable>
+</resources>

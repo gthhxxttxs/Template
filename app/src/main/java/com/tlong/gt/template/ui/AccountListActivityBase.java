@@ -1,9 +1,7 @@
 package com.tlong.gt.template.ui;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,7 +24,7 @@ import com.tlong.gt.template.widget.DividerGridItemDecoration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountListActivity extends MenuActivity implements DataBingingAdapter.OnItemClickListener, View.OnClickListener {
+public class AccountListActivityBase extends BaseMenuActivity implements DataBingingAdapter.OnItemClickListener, View.OnClickListener {
 
     private RecyclerView mAccountListView;
     private DataBingingAdapter mAdapter;

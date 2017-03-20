@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tlong.gt.template.R;
+import com.tlong.gt.template.module.lock.LockPatternActivity;
+import com.tlong.gt.template.module.lock.LockPatternSetupActivity;
 import com.tlong.gt.template.util.LogUtil;
 import com.tlong.gt.template.widget.DividerGridItemDecoration;
 
@@ -54,7 +55,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View view) {
         int position = ((RecyclerView.LayoutParams) view.getLayoutParams()).getViewLayoutPosition();
         LogUtil.e(tag, "position=" + position);
-        startActivity(new Intent(mActivity, AccountListActivity.class));
+        switch (position) {
+            case 0:
+                startActivity(new Intent(mActivity, AccountListActivityBase.class));
+                break;
+            case 1:
+                startActivity(new Intent(mActivity, LockPatternActivity.class));
+                break;
+            case 2:
+                startActivity(new Intent(mActivity, LockPatternSetupActivity.class));
+                break;
+            default:
+        }
     }
 
     private class RecyclerAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {

@@ -11,7 +11,7 @@ import java.util.Set;
  * Created by v_gaoteng on 2017/3/16.
  */
 
-public abstract class MenuActivity extends BaseActivity {
+public abstract class BaseMenuActivity extends BaseActivity {
 
     private Set<MenuItem> mCanCollapseActionViewMenuItems;
 

@@ -18,8 +18,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ui.AccountListActivity"/>
+        <activity android:name=".ui.AccountListActivityBase"/>
         <activity android:name=".ui.AccountDetailsActivity">
+        </activity>
+        <activity android:name=".module.lock.LockPatternActivity">
+        </activity>
+        <activity android:name=".module.lock.LockPatternSetupActivity">
         </activity>
     </application>
 
