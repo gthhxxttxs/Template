@@ -11,4 +11,15 @@
         android:id="@+id/preview_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:onClick="takePicture"
+            android:text="拍照"/>
+    </RelativeLayout>
 </FrameLayout>

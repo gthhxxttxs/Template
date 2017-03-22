@@ -2,9 +2,9 @@ package com.tlong.gt.template.module.camera;
 
 import android.Manifest;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.TextureView;
+import android.view.View;
 
 import com.tlong.gt.template.R;
 import com.tlong.gt.template.ui.BaseActivity;
@@ -24,6 +24,11 @@ public class CameraPreviewActivity extends BaseActivity {
                 .facing(CustomCamera.FACING_BACK)
                 .preview(mPreviewView)
                 .builder();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (mPreviewView.isAvailable()) {
             openCamera();
         } else {
@@ -52,11 +57,15 @@ public class CameraPreviewActivity extends BaseActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onPause() {
         if (mCamera != null) {
             mCamera.release();
-            mCamera = null;
         }
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
         super.onDestroy();
     }
 
@@ -81,5 +90,11 @@ public class CameraPreviewActivity extends BaseActivity {
                         }
                     }
                 });
+    }
+
+    public void takePicture(View view) {
+        if (mCamera != null) {
+            mCamera.stopPreview();
+        }
     }
 }

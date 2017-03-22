@@ -55,7 +55,7 @@ public class CustomCameraImpl extends CustomCamera {
         mCamera = Camera.open(mCameraId);
         mParams = mCamera.getParameters();
         if (mTextureView != null) {
-            setupPreviewView(mTextureView, mTextureListener);
+            setupPreviewView(mTextureView);
         }
         mOpenCallback = openCallback;
         mOpenCallback.onOpened();
@@ -138,7 +138,7 @@ public class CustomCameraImpl extends CustomCamera {
     }
 
     public void startPreview() {
-        if (mCamera == null || mTextureView == null || mPreviewSize == null) {
+        if (mCamera == null || mPreviewSize == null) {
             return;
         }
         mCamera.startPreview();

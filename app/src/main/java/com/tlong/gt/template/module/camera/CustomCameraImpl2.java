@@ -13,6 +13,7 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
@@ -50,6 +51,21 @@ public class CustomCameraImpl2 extends CustomCamera {
     private List<Surface> mSurfaces = new ArrayList<>();
     private Size mPreviewSize;
     private CaptureRequest.Builder mPreviewRequestBuilder;
+    private CameraCaptureSession.CaptureCallback mRequestCallback = new CameraCaptureSession.CaptureCallback() {
+        @Override
+        public void onCaptureProgressed(@NonNull CameraCaptureSession session,
+                                        @NonNull CaptureRequest request,
+                                        @NonNull CaptureResult partialResult) {
+            Integer afState = partialResult.get(CaptureResult.CONTROL_AF_STATE);
+        }
+
+        @Override
+        public void onCaptureCompleted(@NonNull CameraCaptureSession session,
+                                       @NonNull CaptureRequest request,
+                                       @NonNull TotalCaptureResult result) {
+
+        }
+    };
 
     public CustomCameraImpl2(Builder builder) {
         super(builder);
@@ -108,7 +124,7 @@ public class CustomCameraImpl2 extends CustomCamera {
 
     private void createSession(final CameraOpenCallback openCallback) {
         if (mTextureView != null) {
-            setupPreviewView(mTextureView, mTextureListener);
+            setupPreviewView(mTextureView);
         }
         try {
             mCamera.createCaptureSession(mSurfaces, new CameraCaptureSession.StateCallback() {
@@ -192,6 +208,7 @@ public class CustomCameraImpl2 extends CustomCamera {
 
     @Override
     protected void updatePreviewView(@NonNull SurfaceTexture texture, int rotatedPreviewWidth, int rotatedPreviewHeight, int maxPreviewWidth, int maxPreviewHeight) {
+        // 之前已经连接的断开重新连
         if (mSession != null) {
             mSession.close();
             mSession = null;
@@ -268,25 +285,11 @@ public class CustomCameraImpl2 extends CustomCamera {
         mPreviewSize = chooseSize;
     }
 
-    private CameraCaptureSession.CaptureCallback mRequestCallback = new CameraCaptureSession.CaptureCallback() {
-        @Override
-        public void onCaptureProgressed(@NonNull CameraCaptureSession session,
-                                        @NonNull CaptureRequest request,
-                                        @NonNull CaptureResult partialResult) {
-            Integer afState = partialResult.get(CaptureResult.CONTROL_AF_STATE);
-        }
-
-        @Override
-        public void onCaptureCompleted(@NonNull CameraCaptureSession session,
-                                       @NonNull CaptureRequest request,
-                                       @NonNull TotalCaptureResult result) {
-
-        }
-    };
-
-
     @Override
     public void startPreview() {
+        if (mCamera == null || mSession == null || mPreviewSize == null){
+            return;
+        }
         try {
             // 对焦模式 AF(Auto Focus) MF(Manual Focus)
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
@@ -299,6 +302,14 @@ public class CustomCameraImpl2 extends CustomCamera {
 
     @Override
     public void stopPreview() {
-
+        if (mCamera == null || mSession == null){
+            return;
+        }
+        try {
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+            mSession.capture(mPreviewRequestBuilder.build(), mRequestCallback, mBackgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
     }
 }

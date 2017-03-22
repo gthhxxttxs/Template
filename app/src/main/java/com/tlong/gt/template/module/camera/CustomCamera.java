@@ -54,7 +54,6 @@ public abstract class CustomCamera {
 
     protected int mFacing = -1;
     protected TextureView mTextureView;
-    protected TextureView.SurfaceTextureListener mTextureListener;
     protected int mDisplayRotation = -1;
     protected Point mDisplaySize;
 
@@ -110,38 +109,10 @@ public abstract class CustomCamera {
                 mDisplayRotation, mDisplaySize.x, mDisplaySize.y);
     }
 
-    public void setupPreviewView(@NonNull TextureView textureView, TextureView.SurfaceTextureListener l) {
+    public void setupPreviewView(@NonNull TextureView textureView) {
         mTextureView = textureView;
         setDisplayParams((Activity) textureView.getContext());
-        if (textureView.isAvailable()) {
-            updatePreviewView(textureView.getSurfaceTexture(), textureView.getWidth(), textureView.getHeight());
-        } else {
-            if (l == null) {
-                l = new TextureView.SurfaceTextureListener() {
-                    @Override
-                    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                        updatePreviewView(surface, width, height);
-                    }
-
-                    @Override
-                    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                        updatePreviewView(surface, width, height);
-                    }
-
-                    @Override
-                    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                        return true;
-                    }
-
-                    @Override
-                    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-                    }
-                };
-            }
-            mTextureListener = l;
-            textureView.setSurfaceTextureListener(mTextureListener);
-        }
+        updatePreviewView(textureView.getSurfaceTexture(), textureView.getWidth(), textureView.getHeight());
     }
 
     private boolean isSwappedDimensions(int displayRotation) {
