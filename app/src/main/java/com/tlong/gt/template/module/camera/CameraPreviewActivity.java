@@ -13,17 +13,19 @@ import com.tlong.gt.template.util.PermissionUtil;
 public class CameraPreviewActivity extends BaseActivity {
 
     private TextureView mPreviewView;
-    private CustomCamera mCamera;
+//    private CustomCamera mCamera;
+    private CameraDep mCamera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_preview);
         mPreviewView = (TextureView) findViewById(R.id.preview_view);
-        mCamera = new CustomCamera.Builder()
-                .facing(CustomCamera.FACING_BACK)
-                .preview(mPreviewView)
-                .builder();
+//        mCamera = new CustomCamera.Builder()
+//                .facing(CustomCamera.FACING_BACK)
+//                .preview(mPreviewView)
+//                .builder();
+        mCamera = new CameraDep();
     }
 
     @Override
@@ -40,7 +42,7 @@ public class CameraPreviewActivity extends BaseActivity {
 
                 @Override
                 public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                    mCamera.updatePreviewView(surface, width, height);
+                    mCamera.updatePreviewSize(surface, width, height);
                 }
 
                 @Override
@@ -76,17 +78,9 @@ public class CameraPreviewActivity extends BaseActivity {
                     @Override
                     public void call(PermissionUtil.Permission permission) {
                         if (permission.isGranted()) {
-                            mCamera.open(new CustomCamera.CameraOpenCallback() {
-                                @Override
-                                public void onOpened() {
-                                    mCamera.startPreview();
-                                }
-
-                                @Override
-                                public void onClosed() {
-
-                                }
-                            });
+                            mCamera.open(CameraDep.FACING_BACK);
+                            mCamera.setupPreviewView(mPreviewView);
+                            mCamera.startPreview();
                         }
                     }
                 });

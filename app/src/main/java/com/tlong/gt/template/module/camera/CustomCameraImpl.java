@@ -1,20 +1,26 @@
 package com.tlong.gt.template.module.camera;
 
+import android.annotation.TargetApi;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.SparseIntArray;
 
 import com.tlong.gt.template.util.LogUtil;
+import com.tlong.gt.template.util.Util;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by v_gaoteng on 2017/3/21.
+ * Android5.0以下使用
+ * Created by 高腾 on 2017/3/21.
  */
 
-public class CustomCameraImpl extends CustomCamera {
+class CustomCameraImpl extends CustomCamera {
 
     private SparseIntArray mFacingIds;
     private int mCameraId;
@@ -23,7 +29,7 @@ public class CustomCameraImpl extends CustomCamera {
     private Camera.Parameters mParams;
     private Camera.Size mPreviewSize;
 
-    public CustomCameraImpl(Builder builder) {
+    CustomCameraImpl(Builder builder) {
         super(builder);
         initFacingIds();
     }
@@ -73,21 +79,6 @@ public class CustomCameraImpl extends CustomCamera {
         }
     }
 
-    /**
-     * 开启自动对焦模式
-     */
-    private void autoFocus() {
-        String focusMode = mParams.getFocusMode();
-        if (!Camera.Parameters.FOCUS_MODE_AUTO.equals(focusMode)) {
-            List<String> focusModes = mParams.getSupportedFocusModes();
-            if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-                mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                mCamera.setParameters(mParams);
-                mParams = mCamera.getParameters();
-            }
-        }
-    }
-
     @Override
     protected void updatePreviewView(@NonNull final SurfaceTexture texture,
                                      final int rotatedPreviewWidth, final int rotatedPreviewHeight,
@@ -100,7 +91,7 @@ public class CustomCameraImpl extends CustomCamera {
             mParams.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
             mCamera.setParameters(mParams);
             mParams = mCamera.getParameters();
-            mCamera.setDisplayOrientation(ORIENTATIONS.get(mDisplayRotation));
+            mCamera.setDisplayOrientation(getDegrees());
             texture.setDefaultBufferSize(mPreviewSize.width, mPreviewSize.height);
             mCamera.setPreviewTexture(texture);
         } catch (IOException e) {
@@ -137,6 +128,13 @@ public class CustomCameraImpl extends CustomCamera {
         return info.orientation;
     }
 
+    private int getDegrees() {
+        if (mDisplayRotation == -1) {
+            throw new CameraException(CameraException.TYPE_LOG, "需要先调用setDisplayParams()");
+        }
+        return ORIENTATIONS.get(mDisplayRotation);
+    }
+
     public void startPreview() {
         if (mCamera == null || mPreviewSize == null) {
             return;
@@ -150,4 +148,60 @@ public class CustomCameraImpl extends CustomCamera {
         }
         mCamera.stopPreview();
     }
+
+    /**
+     * 开启自动对焦模式
+     */
+    private boolean canAutoFocus() {
+        String focusMode = mParams.getFocusMode();
+        if (Camera.Parameters.FOCUS_MODE_AUTO.equals(focusMode)) {
+            return true;
+        }
+        List<String> focusModes = mParams.getSupportedFocusModes();
+        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+            mCamera.setParameters(mParams);
+            mParams = mCamera.getParameters();
+            return true;
+        }
+        return false;
+    }
+
+    public void pointFocus(float x, float y, int viewWidth, int viewHeight, int focusAreaSize) {
+        if (mCamera == null || !canAutoFocus()) {
+            return;
+        }
+        /*
+         * 相机坐标系:横屏长边为x轴，x轴和y轴数值固定是-1000 ~ 1000
+         * 定点对焦需要将屏幕坐标系上的点转为相机坐标系的点
+         */
+        int left;
+        int top;
+        switch (getDegrees()) {
+            // 横屏，两坐标系x、y轴重合
+            case 0:
+            case 180:
+                left = Util.clamp((int) (x / viewWidth * 2000 - 1000), -1000, 1000 - focusAreaSize);
+                top = Util.clamp((int) (y / viewHeight * 2000 - 1000), -1000, 1000 - focusAreaSize);
+                break;
+            // 竖屏，屏幕x轴是相机y轴，屏幕y轴是相机x轴
+            case 90:
+            case 270:
+                left = Util.clamp((int) (y / viewHeight * 2000 - 1000), -1000, 1000 - focusAreaSize);
+                top = Util.clamp((int) (x / viewWidth * 2000 - 1000), -1000, 1000 - focusAreaSize);
+                break;
+            default:
+                left = 0;
+                top = 0;
+                break;
+        }
+        Rect area = new Rect(left, top, left + focusAreaSize, top + focusAreaSize);
+        List<Camera.Area> focusAreas = new ArrayList<>();
+        focusAreas.add(new Camera.Area(area, 1000)); // 参数是对焦区域和权重
+        mParams.setFocusAreas(focusAreas);
+        mCamera.setParameters(mParams);
+        mParams = mCamera.getParameters();
+        mCamera.autoFocus(null);
+    }
+
 }

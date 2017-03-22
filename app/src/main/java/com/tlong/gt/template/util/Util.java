@@ -23,4 +23,21 @@ public class Util {
     public static String formatString(String format, Object... args) {
         return String.format(Locale.CHINA, format, args);
     }
+
+    /**
+     * 数字过滤
+     * @param num 源数字
+     * @param min 最小值
+     * @param max 最大值
+     * @return 介于最小值和最大值之间的数字
+     */
+    public static int clamp(int num, int min, int max) {
+        if (num > max) {
+            return max;
+        }
+        if (num < min) {
+            return min;
+        }
+        return num;
+    }
 }
