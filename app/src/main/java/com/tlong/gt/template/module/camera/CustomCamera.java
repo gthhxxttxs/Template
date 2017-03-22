@@ -52,8 +52,9 @@ public abstract class CustomCamera {
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
 
-    protected int mFacing;
+    protected int mFacing = -1;
     protected TextureView mTextureView;
+    protected TextureView.SurfaceTextureListener mTextureListener;
     protected int mDisplayRotation = -1;
     protected Point mDisplaySize;
 
@@ -138,7 +139,8 @@ public abstract class CustomCamera {
                     }
                 };
             }
-            textureView.setSurfaceTextureListener(l);
+            mTextureListener = l;
+            textureView.setSurfaceTextureListener(mTextureListener);
         }
     }
 
@@ -232,7 +234,7 @@ public abstract class CustomCamera {
     }
 
     public interface CameraOpenCallback {
-        void onOpen();
-        void onClose();
+        void onOpened();
+        void onClosed();
     }
 }

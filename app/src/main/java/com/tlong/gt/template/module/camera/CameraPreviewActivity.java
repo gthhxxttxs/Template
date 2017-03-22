@@ -61,18 +61,25 @@ public class CameraPreviewActivity extends BaseActivity {
     }
 
     private void openCamera() {
-        if (PermissionUtil.checkPermission(mActivity, Manifest.permission.CAMERA)) {
-            mCamera.open(new CustomCamera.CameraOpenCallback() {
-                @Override
-                public void onOpen() {
-                    mCamera.startPreview();
-                }
+        PermissionUtil.request(mActivity)
+                .permission(Manifest.permission.CAMERA)
+                .callback(new PermissionUtil.Callback<PermissionUtil.Permission>() {
+                    @Override
+                    public void call(PermissionUtil.Permission permission) {
+                        if (permission.isGranted()) {
+                            mCamera.open(new CustomCamera.CameraOpenCallback() {
+                                @Override
+                                public void onOpened() {
+                                    mCamera.startPreview();
+                                }
 
-                @Override
-                public void onClose() {
+                                @Override
+                                public void onClosed() {
 
-                }
-            });
-        }
+                                }
+                            });
+                        }
+                    }
+                });
     }
 }

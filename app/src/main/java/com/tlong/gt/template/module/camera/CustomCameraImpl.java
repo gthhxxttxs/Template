@@ -4,7 +4,6 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.support.annotation.NonNull;
 import android.util.SparseIntArray;
-import android.view.TextureView;
 
 import com.tlong.gt.template.util.LogUtil;
 
@@ -56,10 +55,10 @@ public class CustomCameraImpl extends CustomCamera {
         mCamera = Camera.open(mCameraId);
         mParams = mCamera.getParameters();
         if (mTextureView != null) {
-            setupPreviewView(mTextureView, null);
+            setupPreviewView(mTextureView, mTextureListener);
         }
         mOpenCallback = openCallback;
-        mOpenCallback.onOpen();
+        mOpenCallback.onOpened();
     }
 
     @Override
@@ -69,7 +68,7 @@ public class CustomCameraImpl extends CustomCamera {
             mCamera.release();
             mCamera = null;
             if (mOpenCallback != null) {
-                mOpenCallback.onClose();
+                mOpenCallback.onClosed();
             }
         }
     }

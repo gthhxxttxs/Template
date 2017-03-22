@@ -45,6 +45,6 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     }
 
     private void saveCrash(Thread t, Throwable e) {
-        App.exit();
+        e.printStackTrace();
     }
 }
