@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tlong.gt.template.R;
+import com.tlong.gt.template.module.camera.CameraPreviewActivity;
 import com.tlong.gt.template.module.lock.LockPatternActivity;
 import com.tlong.gt.template.module.lock.LockPatternSetupActivity;
 import com.tlong.gt.template.util.LogUtil;
@@ -64,6 +65,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case 2:
                 startActivity(new Intent(mActivity, LockPatternSetupActivity.class));
+                break;
+            case 3:
+                startActivity(new Intent(mActivity, CameraPreviewActivity.class));
                 break;
             default:
         }

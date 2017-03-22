@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.tlong.gt.template">
 
+    <uses-permission android:name="android.permission.CAMERA"/>
+
     <application
         android:name=".App"
         android:allowBackup="false"
@@ -24,6 +26,8 @@
         <activity android:name=".module.lock.LockPatternActivity">
         </activity>
         <activity android:name=".module.lock.LockPatternSetupActivity">
+        </activity>
+        <activity android:name=".module.camera.CameraPreviewActivity">
         </activity>
     </application>
 
