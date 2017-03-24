@@ -21,5 +21,10 @@
             android:layout_alignParentBottom="true"
             android:onClick="takePicture"
             android:text="拍照"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="change"
+            android:text="切换摄像头"/>
     </RelativeLayout>
 </FrameLayout>

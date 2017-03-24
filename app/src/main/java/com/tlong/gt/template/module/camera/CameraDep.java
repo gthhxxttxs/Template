@@ -1,19 +1,26 @@
 package com.tlong.gt.template.module.camera;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.support.annotation.NonNull;
 import android.util.AndroidRuntimeException;
 import android.util.SparseIntArray;
 import android.view.TextureView;
 
-import com.tlong.gt.template.util.Util;
+import com.tlong.gt.template.util.LogUtil;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,6 +28,8 @@ import java.util.List;
  * Created by 高腾 on 2017/3/22.
  */
 public class CameraDep {
+
+    private static final String TAG = CameraDep.class.getSimpleName();
 
     public static final int FACING_BACK = Camera.CameraInfo.CAMERA_FACING_BACK;
     public static final int FACING_FRONT = Camera.CameraInfo.CAMERA_FACING_FRONT;
@@ -54,6 +63,7 @@ public class CameraDep {
     }
 
     public void open(int facing) {
+        release();
         mCameraId = checkFacing(facing);
         mCamera = Camera.open(mCameraId);
         mParams = mCamera.getParameters();
@@ -115,10 +125,26 @@ public class CameraDep {
             mParams.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
             updateParams();
             mCamera.setPreviewTexture(texture);
+            LogUtil.e(TAG, "previewSize{w : %d, h : %d} ", mPreviewSize.width, mPreviewSize.height);
+            updatePictureSize();
         } catch (IOException e) {
             mPreviewSize = null;
             e.printStackTrace();
         }
+    }
+
+    public int getPreviewWidth() {
+        if (mPreviewSize != null) return mPreviewSize.width;
+        return mParams == null ? 0 : mParams.getPreviewSize().width;
+    }
+
+    public int getPreviewHeight() {
+        if (mPreviewSize != null) return mPreviewSize.height;
+        return mParams == null ? 0 : mParams.getPreviewSize().height;
+    }
+
+    public int getPreviewFormat() {
+        return mParams == null ? 0 : mParams.getPreviewFormat();
     }
 
     /** 获取摄像头传感器方向. */
@@ -144,7 +170,12 @@ public class CameraDep {
         return false;
     }
 
-
+    /**
+     * 定点对焦
+     * @param x X坐标
+     * @param y Y坐标
+     * @param focusAreaSize 对焦区域大小
+     */
     public void pointFocus(float x, float y, int focusAreaSize) {
         if (mCamera == null || mPreviewViewWidth == 0 || mPreviewViewHeight == 0 || !canAutoFocus()) {
             return;
@@ -182,4 +213,81 @@ public class CameraDep {
         updateParams();
         mCamera.autoFocus(null);
     }
+
+    public void takePicture(String path) {
+        LogUtil.e(TAG, "path=%s", path);
+        mPicturePath = path;
+        mCamera.takePicture(null, null, mPictureCallback);
+//        mCamera.setOneShotPreviewCallback(mPreviewCallback);
+    }
+
+    private void updatePictureSize() {
+        if (mCamera == null || mPreviewSize == null) {
+            return;
+        }
+        List<Camera.Size> sizes = mParams.getSupportedPictureSizes();
+        mPictureSize = CameraUtil.chooseLargeSize(sizes, mPreviewSize.width, mPreviewSize.height, 4096, 4096);
+        mParams.setPictureSize(mPictureSize.width, mPictureSize.height);
+        updateParams();
+        LogUtil.e(TAG, "pictureSize{w:%d, h:%d} ", mPictureSize.width, mPictureSize.height);
+    }
+
+    private String mPicturePath;
+    private Camera.Size mPictureSize;
+
+    private Camera.PictureCallback mPictureCallback = new Camera.PictureCallback() {
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            savePicture(data);
+        }
+    };
+
+    private void savePicture(byte[] data) {
+        File pictureFile = new File(mPicturePath);
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(pictureFile);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            Matrix matrix = new Matrix();
+            matrix.setRotate(CameraUtil.getPictureDegrees(mDisplayRotation, getSensorOrientation()));
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, mPictureSize.width, mPictureSize.height, matrix, true);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+//            fos.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
+        @Override
+        public void onPreviewFrame(byte[] data, Camera camera) {
+            File pictureFile = new File(mPicturePath);
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(pictureFile);
+                int format = mParams.getPreviewFormat();
+                LogUtil.e(TAG, "previewFormat:" + format);
+                YuvImage yuvImage = new YuvImage(data, format, mPreviewSize.width, mPictureSize.height, null);
+                yuvImage.compressToJpeg(new Rect(0, 0, mPreviewSize.width, mPictureSize.height), 100, fos);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    };
 }

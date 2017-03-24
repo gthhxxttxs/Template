@@ -1,8 +1,14 @@
 package com.tlong.gt.template.module.camera;
 
 import android.Manifest;
+import android.app.Activity;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 
@@ -10,11 +16,14 @@ import com.tlong.gt.template.R;
 import com.tlong.gt.template.ui.BaseActivity;
 import com.tlong.gt.template.util.PermissionUtil;
 
+import java.io.File;
+
 public class CameraPreviewActivity extends BaseActivity {
 
     private TextureView mPreviewView;
 //    private CustomCamera mCamera;
     private CameraDep mCamera;
+    private int mCameraFacing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +35,7 @@ public class CameraPreviewActivity extends BaseActivity {
 //                .preview(mPreviewView)
 //                .builder();
         mCamera = new CameraDep();
+        mCameraFacing = CameraDep.FACING_BACK;
     }
 
     @Override
@@ -78,7 +88,7 @@ public class CameraPreviewActivity extends BaseActivity {
                     @Override
                     public void call(PermissionUtil.Permission permission) {
                         if (permission.isGranted()) {
-                            mCamera.open(CameraDep.FACING_BACK);
+                            mCamera.open(mCameraFacing);
                             mCamera.setupPreviewView(mPreviewView);
                             mCamera.startPreview();
                         }
@@ -88,7 +98,17 @@ public class CameraPreviewActivity extends BaseActivity {
 
     public void takePicture(View view) {
         if (mCamera != null) {
-            mCamera.stopPreview();
+            mCamera.takePicture(getExternalCacheDir().getPath() + File.separator + SystemClock.uptimeMillis() + ".jpg");
         }
+    }
+
+    public void change(View view) {
+        mCamera.release();
+        if (mCameraFacing == CameraDep.FACING_BACK) {
+            mCameraFacing = CameraDep.FACING_FRONT;
+        } else {
+            mCameraFacing = CameraDep.FACING_BACK;
+        }
+        openCamera();
     }
 }

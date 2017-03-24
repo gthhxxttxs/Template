@@ -55,7 +55,7 @@ public class LockPatternView extends View {
 
     /**
      * How many milliseconds we spend animating each circle of a lock pattern
-     * if the animating mode is set.  The entire animation should take this
+     * if the animating mode is set.  The entire animation should takePicture this
      * constant * the length of the pattern to complete.
      */
     private static final int MILLIS_PER_CIRCLE_ANIMATING = 700;
