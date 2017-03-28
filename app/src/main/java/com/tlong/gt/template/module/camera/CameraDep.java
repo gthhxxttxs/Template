@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.AndroidRuntimeException;
 import android.util.SparseIntArray;
@@ -20,7 +21,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,6 +33,9 @@ public class CameraDep {
 
     public static final int FACING_BACK = Camera.CameraInfo.CAMERA_FACING_BACK;
     public static final int FACING_FRONT = Camera.CameraInfo.CAMERA_FACING_FRONT;
+
+    @IntDef({FACING_BACK, FACING_FRONT})
+    @interface FacingType {}
 
     private SparseIntArray mFacingIds;
     private int mCameraId;
@@ -54,7 +57,7 @@ public class CameraDep {
         }
     }
 
-    private int checkFacing(int facing) {
+    private int checkFacing(@FacingType int facing) {
         int id = mFacingIds.get(facing, -1);
         if (id == -1) {
             throw new AndroidRuntimeException("facing{" + facing + "} error");
@@ -62,7 +65,7 @@ public class CameraDep {
         return id;
     }
 
-    public void open(int facing) {
+    public void open(@FacingType int facing) {
         release();
         mCameraId = checkFacing(facing);
         mCamera = Camera.open(mCameraId);
@@ -114,6 +117,12 @@ public class CameraDep {
 
     public void updatePreviewSize(@NonNull SurfaceTexture texture, int width, int height) {
         if (mCamera == null || mDisplaySize == null || width == 0 || height == 0) {
+            return;
+        }
+        if (isPreview) {
+            stopPreview();
+            updatePreviewSize(texture, width, height);
+            startPreview();
             return;
         }
         mPreviewViewWidth = width;
