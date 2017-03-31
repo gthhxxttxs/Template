@@ -69,6 +69,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case 3:
                 startActivity(new Intent(mActivity, CameraPreviewActivity.class));
                 break;
+            case 4:
+                startActivity(new Intent(mActivity, WebActivity.class));
+                break;
             default:
         }
     }
